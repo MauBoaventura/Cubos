@@ -4,7 +4,7 @@
   "description": "Olá! Neste desafio você deve criar uma API REST para facilitar o gerenciamento de horários de uma clínica! Sua API deve conter endpoints para satisfazer as seguintes features:",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./bin/server.js"  
+    "start": "nodemon ./bin/server.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/MauBoaventura/Cubos#readme",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "moment": "^2.24.0"
   },
