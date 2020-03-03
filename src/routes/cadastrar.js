@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const fs = require('fs');
 
 //Uso de Datas
 const moment = require("moment")
@@ -12,12 +13,11 @@ moment.locale("pt-br");
 // 5-Sex;
 // 6-Sab
 // console.log("Data Fim   : " + moment(DataFim - 100000000).format("DD-MM-YYYY hh:mm:ss [dia da semana: ]d ddd"))
-var num = 0
-var incremen = () => {
-    num++;
-    return num
-};
+String.prototype.isNumberOfWeek = function () {
+    return /^[0-6]+$/.test(this);
+}
 
+//Salvar um atendimento em um dia e horario especificos
 router.post('/especifico', (req, res) => {
     const DataInicio = req.body.longI;
     const DataFim = req.body.longF;
@@ -34,11 +34,26 @@ router.post('/especifico', (req, res) => {
         end: moment(DataFim).format("hh:mm")
     }
 
-    //Inserir no arquivo json
+
+    //Ler json salvo em data
+    let rawdata = fs.readFileSync("src\\data\\data.json");
+    let dados = JSON.parse(rawdata);
+
+    //Insere na variavel
+    dados.horarios.push(salvar)
+
+    //Inserir novo cadastro no arquivo json
+    fs.writeFile("src\\data\\data.json", JSON.stringify(dados), function (erro) {
+        if (erro) {
+            throw erro;
+        }
+        console.log("Atendimento salvo");
+    });
 
     res.status(201).send(salvar)
 })
 
+//Salvar um atendimento em um horario especificos diariamente
 router.post('/diario', (req, res) => {
     const DataInicio = req.body.longI;
     const DataFim = req.body.longF;
@@ -54,12 +69,26 @@ router.post('/diario', (req, res) => {
         end: moment(DataFim).format("hh:mm")
     }
 
-    //Inserir no arquivo json
+
+    //Ler json salvo em data
+    let rawdata = fs.readFileSync("src\\data\\data.json");
+    let dados = JSON.parse(rawdata);
+
+    //Insere na variavel
+    dados.horarios.push(salvar)
+
+    //Inserir novo cadastro no arquivo json
+    fs.writeFile("src\\data\\data.json", JSON.stringify(dados), function (erro) {
+        if (erro) {
+            throw erro;
+        }
+        console.log("Atendimento salvo");
+    });
 
     res.status(201).send(salvar)
 })
-String.prototype.isNumberOfWeek = function(){return /^[0-6]+$/.test(this);}
 
+//Salvar um atendimento em um horario especificos em dias da semana especificos
 router.post('/semanal', (req, res) => {
     const DataInicio = req.body.longI;
     const DataFim = req.body.longF;
@@ -67,7 +96,7 @@ router.post('/semanal', (req, res) => {
     if (DataInicio > DataFim) {
         res.status(400).send("Erro: Data inicio maior que data fim")
     }
-    if(!req.body.week.isNumberOfWeek()){
+    if (!req.body.week.isNumberOfWeek()) {
         res.status(400).send("Erro: Data inicio maior que data fim")
     }
 
@@ -78,10 +107,22 @@ router.post('/semanal', (req, res) => {
         end: moment(DataFim).format("hh:mm")
     }
 
-    //Inserir no arquivo json
+    //Ler json salvo em data
+    let rawdata = fs.readFileSync("src\\data\\data.json");
+    let dados = JSON.parse(rawdata);
+
+    //Insere na variavel
+    dados.horarios.push(salvar)
+
+    //Inserir novo cadastro no arquivo json
+    fs.writeFile("src\\data\\data.json", JSON.stringify(dados), function (erro) {
+        if (erro) {
+            throw erro;
+        }
+        console.log("Atendimento salvo");
+    });
 
     res.status(201).send(salvar)
 })
-
 
 module.exports = router;
