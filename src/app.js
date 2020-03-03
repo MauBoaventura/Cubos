@@ -1,5 +1,12 @@
 const express = require("express");
 const app = express();
+const bodyParser = require("body-parser")
+
+//Body Parser
+app.use(bodyParser.urlencoded({
+    extended: false
+}))
+app.use(bodyParser.json())
 
 //Importa arquivos das rotas
 const cadastrar = require("./routes/cadastrar")
@@ -8,9 +15,9 @@ const listar = require("./routes/listar")
 const disponivel = require("./routes/disponivel")
 
 //Rotas
-app.use("/cad", cadastrar)
-app.use("/del", deletar)
-app.use("/list_all", listar)
+app.use("/", cadastrar)
+app.use("/", deletar)
+app.use("/", listar)
 app.use("/list_disp", disponivel)
 
 module.exports = app;

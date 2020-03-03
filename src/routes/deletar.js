@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-router.get('/', (req, res) =>{
+router.delete('/', (req, res) =>{
     res.send("<h1>Deletar</h1>")
 } )
 
