@@ -1,5 +1,10 @@
 const express = require("express");
 const router = express.Router();
+
+//Gerar ids unicos
+const uuidv1 = require('uuid/v1')
+
+//Manipular arquivos
 const fs = require('fs');
 
 //Uso de Datas
@@ -28,6 +33,7 @@ router.post('/especifico', (req, res) => {
     }
 
     var salvar = {
+        id: uuidv1(),
         day: moment(DataFim).format("DD-MM-YYYY"),
         weekDay: moment(DataFim).format("d"),
         start: moment(DataInicio).format("hh:mm"),
@@ -63,6 +69,7 @@ router.post('/diario', (req, res) => {
     }
 
     var salvar = {
+        id: uuidv1(),
         day: "all",
         weekDay: "all",
         start: moment(DataInicio).format("hh:mm"),
@@ -101,6 +108,7 @@ router.post('/semanal', (req, res) => {
     }
 
     var salvar = {
+        id: uuidv1(),
         day: "all",
         weekDay: req.body.week,
         start: moment(DataInicio).format("hh:mm"),
