@@ -1,1 +1,25 @@
-{"horarios":[{"id":"eeb2ada0-5dc1-11ea-83cf-875b28f82960","day":"03-03-2020","weekDay":"2","start":"03:10","end":"03:54"},{"id":"ef9a2770-5dc1-11ea-b655-2151504b4010","day":"all","weekDay":"all","start":"03:10","end":"03:54"}]}
+{
+    "horarios": [
+        {
+            "id": "eeb2ada0-5dc1-11ea-83cf-875b28f82960",
+            "day": "03-03-2020",
+            "weekDay": "2",
+            "start": "03:10",
+            "end": "03:54"
+        },
+        {
+            "id": "ef9a2770-5dc1-11ea-b655-2151504b4010",
+            "day": "all",
+            "weekDay": "all",
+            "start": "03:10",
+            "end": "03:54"
+        },
+        {
+            "id": "17647a20-5deb-11ea-a010-55fda3fe4405",
+            "day": "all",
+            "weekDay": "246",
+            "start": "03:10",
+            "end": "03:54"
+        }
+    ]
+}

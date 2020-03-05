@@ -18,6 +18,6 @@ const disponivel = require("./routes/disponivel")
 app.use("/", cadastrar)
 app.use("/", deletar)
 app.use("/", listar)
-app.use("/", disponivel)
+app.use("/disp", disponivel)
 
 module.exports = app;
