@@ -7,9 +7,15 @@ const fs = require('fs');
 router.delete('/:id', (req, res) => {
     var id = req.params.id
     //Ler json salvo em data
-    let rawdata = fs.readFileSync("src\\data\\data.json");
-    let dados = JSON.parse(rawdata);
-
+    let dados;
+    try {
+        let rawdata = fs.readFileSync("src\\data\\data.json");
+        dados = JSON.parse(rawdata);
+    } catch (error) {
+        dados = {
+            "horarios": []
+        }
+    }
     let msg = removerPorId(dados.horarios, id)
 
     console.log(msg)
