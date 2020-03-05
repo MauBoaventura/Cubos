@@ -26,7 +26,7 @@ router.get('/', (req, res) => {
     var resptudo = []
 
     //Filtrando todos atendimentos em um array
-    var datasOcupadas = dados.horarios.map(function (horario) {
+    dados.horarios.map(function (horario) {
 
         //erro de horario.day for "all"
         // let start = moment(horario.day + " " + horario.start, "DD-MM-YYYY HH:mm")
@@ -102,8 +102,10 @@ router.get('/', (req, res) => {
         return horario;
 
     });
-    console.log(resptudo)
+    //    console.log(resptudo)
 
+    //final
+    var horariosDisponiveis = []
 
     var weekday_index = dataInicio.clone();
     console.log("\n\n");
@@ -122,28 +124,21 @@ router.get('/', (req, res) => {
             return element !== undefined;
         });
 
-        console.log("Intervalos do dia:" + weekday_index.format("DD-MM-YYYY [Dia da semana] d:dddd") + " ");
-        console.log(intervalos);
+        // console.log("Intervalos do dia:" + weekday_index.format("DD-MM-YYYY [Dia da semana] d:dddd") + " ");
+        // console.log(intervalos);
+        if (!intervalos.length == 0) {
+            horariosDisponiveis.push({
+                day: weekday_index.format("DD-MM-YYYY"),
+                intervals: intervalos
+            })
+        }
+
+
         weekday_index = weekday_index.add(1, "day")
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    console.log("FINAL")
-    res.status(200).send("dados.horarios")
+    res.status(200).send(horariosDisponiveis)
 })
 
 
