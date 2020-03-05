@@ -12,81 +12,120 @@ router.get('/', (req, res) => {
     } = req.query
 
     //Tranforma datas em obj Moment
-    let dataInicio = moment(ini)
-    let dataFim = moment(end) //+23h:59m
+    let dataInicio = moment.unix(ini)
+    console.log(dataInicio.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"))
+    let dataFim = moment.unix(end)
+    console.log(dataFim.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"))
+
+    // let dataFim = moment.unix(end) //+23h:59m
 
     //Ler arquivo data.json
     let rawdata = fs.readFileSync("src\\data\\data.json");
     let dados = JSON.parse(rawdata);
 
-    var resptudo = [{
-        day: String,
-        intervals: [{
-            start: String,
-            end: String
-        }]
-    }]
+    var resptudo = []
+
     //Filtrando todos atendimentos em um array
     var datasOcupadas = dados.horarios.map(function (horario) {
 
         //erro de horario.day for "all"
         // let start = moment(horario.day + " " + horario.start, "DD-MM-YYYY HH:mm")
         // let end = moment(horario.day + " " + horario.end, "DD-MM-YYYY HH:mm")
-
+        // console.log(horario)
         //Tratando atendimento diarios
-        if (horario.day == "all" && horario.weekday == "all") {
+        if (horario.day == "all" && horario.weekDay == "all") {
             //inicia a variavel
-            var weekday_index = dataInicio;
-
+            console.log("DIARIO")
+            var weekday_index = dataInicio.clone();
             //Como ocorre todo dia, todo atendimento é passado a frente 
             while (weekday_index < dataFim) {
 
                 var resp = {
                     day: weekday_index.format("DD-MM-YYYY"),
                     //Intervalo errado mas é esse o sentido
-                    intervals: [{
+                    intervals: {
                         start: horario.start,
                         end: horario.end
-                    }]
+                    }
                 }
                 resptudo.push(resp)
 
                 weekday_index = weekday_index.add(1, "day")
             }
-        } // else
+        } else
 
 
-        //Tratando atendimento em datas especificas
-        if (horario.day != "all") {
-            //Se a day esta entre o intervalo [dataInicio, dataFim]
-            if (moment(horario.day).isBetween(dataInicio, dataFim)) {
-                //Se estiver entre essas datas o atendimento é mantido no array
-
-            } else {
-                //Atendimento é descartado
-            }
-        } // else{
-        //Tratando atendimento semanais
-        if (horario.day == "all") {
-
-            var weekday_index = dataInicio;
-            ///necessario adicionar 1 min ao datefim
-            while (weekday_index < dataFim) {
-
-                //Se o dia da semana que esta sendo iterado for igual um dos dias da semana do atendimento
-                if (horario.weekday.indexOf(weekday_index.format("d")) > -1) {
-                    //Adicona no array
+            //Tratando atendimento em datas especificas
+            if (horario.day != "all") {
+                console.log("ESPECIFICO")
+                //Se a day esta entre o intervalo [dataInicio, dataFim]
+                if (moment(horario.day, "DD-MM-YYYY").isBetween(dataInicio, dataFim)) {
+                    var resp = {
+                        day: horario.day,
+                        //Intervalo errado mas é esse o sentido
+                        intervals: {
+                            start: horario.start,
+                            end: horario.end
+                        }
+                    }
+                    resptudo.push(resp)
+                } else {
+                    //Atendimento é descartado
                 }
+            } else
+                //Tratando atendimento semanais
+                if (horario.day == "all") {
+                    console.log("SEMANAL")
 
-                weekday_index = weekday_index.add(1, "day")
-            }
-        }
+                    var weekday_index = dataInicio.clone();
+                    ///necessario adicionar 1 min ao datefim
+                    while (weekday_index < dataFim) {
+
+                        //Se o dia da semana que esta sendo iterado for igual um dos dias da semana do atendimento
+                        if (horario.weekDay.indexOf(weekday_index.format("d")) > -1) {
+                            var resp = {
+                                day: weekday_index.format("DD-MM-YYYY"),
+                                //Intervalo errado mas é esse o sentido
+                                intervals: {
+                                    start: horario.start,
+                                    end: horario.end
+                                }
+                            }
+                            resptudo.push(resp)
+                        }
+
+                        weekday_index = weekday_index.add(1, "day")
+                    }
+                }
 
 
         return horario;
 
     });
-    console.log(datasOcupadas)
+    console.log(resptudo)
+
+
+    var weekday_index = dataInicio.clone();
+    console.log("\n\n");
+
+    while (weekday_index < dataFim) {
+
+        //Para cada elemento se retornara os intervalos afim de agrupar por dia
+        let intervalos = resptudo.map((element) => {
+            if (element.day == weekday_index.format("DD-MM-YYYY")) {
+                return element.intervals
+            }
+        })
+
+        //Filtro de undefined
+        intervalos = intervalos.filter(function (element) {
+            return element !== undefined;
+        });
+
+        console.log("Intervalos do dia:" + weekday_index.format("DD-MM-YYYY [Dia da semana] d:dddd") + " ");
+        console.log(intervalos);
+        weekday_index = weekday_index.add(1, "day")
+    }
 
 
 
@@ -103,8 +142,7 @@ router.get('/', (req, res) => {
 
 
 
-
-
+    console.log("FINAL")
     res.status(200).send("dados.horarios")
 })
 
