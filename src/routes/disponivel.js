@@ -33,7 +33,7 @@ router.get('/', (req, res) => {
         // let end = moment(horario.day + " " + horario.end, "DD-MM-YYYY HH:mm")
         // console.log(horario)
         //Tratando atendimento diarios
-        if (horario.day == "all" && horario.weekDay == "all") {
+        if (horario.day == "all" && horario.weekDay == "0123456") {
             //inicia a variavel
             console.log("DIARIO")
             var weekday_index = dataInicio.clone();
