@@ -223,14 +223,97 @@ function retornaDiasEspecifico() {
     // })
     return retorno;
 }
-//Tranforma json de entrada em um de saida
+//Retorna todos os dias semana
+function retornaDiasSemana() {
+    let dados = lerJSON()
+
+    //Filtrando todos dias especificos
+    let retorno = dados.horarios.filter(function (horario) {
+        //Tratando atendimento em datas especificas
+        if (horario.day == "all" && horario.weekDay != "all") {
+            console.log("Semanal")
+            return horario.day
+        };
+    })
+
+    // retorno = retorno.map((element) => {
+    //     return element.day
+    // })
+    return retorno;
+}
+
 function haConflitoDeHorario(possivelConflitoDeHorario, DataInicio, DataFinal) {
     var I = (DataInicio)
     var F = (DataFinal)
     //Verifica os horarios do dia especifico
     let conflitos = possivelConflitoDeHorario.filter((element) => {
+        console.log("ELEMENT");
+
+        console.log(element)
         var intervaloI = moment(element.day + " " + element.start, "DD-MM-YYYY HH:mm")
         var intervaloF = moment(element.day + " " + element.end, "DD-MM-YYYY HH:mm")
+        // console.log("VERIFICACAO " + intervaloI.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"));
+        // console.log("VERIFICACAO " + moment.unix(DataInicio).format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"));
+        // console.log("VERIFICACAO " + intervaloF.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"));
+        // console.log();
+
+        // console.log(I.format("DD-MM-YYYY HH:mm"));
+        // console.log(intervaloI.format("DD-MM-YYYY HH:mm"));
+        // console.log(F.format("DD-MM-YYYY HH:mm"));
+        // console.log(intervaloF.format("DD-MM-YYYY HH:mm"));
+        // console.log()
+
+        //Se os conjuntos forem iguais não insere
+        if (I.format("DD-MM-YYYY HH:mm") == intervaloI.format("DD-MM-YYYY HH:mm") && F.format("DD-MM-YYYY HH:mm") == intervaloF.format("DD-MM-YYYY HH:mm")) {
+            console.log("IGUAL")
+            return element;
+        } else
+            //verifica se a data inicio e data fim esta entre os intervalos já existentes
+            if ((moment.unix(DataInicio).isBetween(intervaloI, intervaloF, null, "()") ||
+                    moment.unix(DataFinal).isBetween(intervaloI, intervaloF, null, "()"))) {
+                //Se um dos extremos estiver no meio não salva o atendimento
+                console.log("CONFLITO");
+                return element;
+            } else {
+                if (moment.unix(DataInicio).isBefore(intervaloI) &&
+                    moment.unix(DataFinal).isAfter(intervaloF)) {
+                    console.log("CONFLITO");
+                    return element
+                }
+            }
+    })
+    console.log("Depois ");
+
+    console.log(conflitos);
+
+    if (conflitos.length == 0) {
+        return false
+    } else {
+        return true
+    }
+}
+
+
+function haConflitoDeHorario(possivelConflitoDeHorario, DataInicio, DataFinal) {
+    var I = (DataInicio)
+    var F = (DataFinal)
+    //Verifica os horarios do dia especifico
+    let conflitos = possivelConflitoDeHorario.filter((element) => {
+        console.log("ELEMENT");
+
+        console.log(element)
+        var intervaloI = moment(I.format("DD-MM-YYYY") + " " + element.start, "DD-MM-YYYY HH:mm")
+        var intervaloF = moment(F.format("DD-MM-YYYY") + " " + element.end, "DD-MM-YYYY HH:mm")
+        // console.log("VERIFICACAO " + intervaloI.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"));
+        // console.log("VERIFICACAO " + moment.unix(DataInicio).format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"));
+        // console.log("VERIFICACAO " + intervaloF.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"));
+        // console.log();
+
+        // console.log(I.format("DD-MM-YYYY HH:mm"));
+        // console.log(intervaloI.format("DD-MM-YYYY HH:mm"));
+        // console.log(F.format("DD-MM-YYYY HH:mm"));
+        // console.log(intervaloF.format("DD-MM-YYYY HH:mm"));
+        // console.log()
 
         //Se os conjuntos forem iguais não insere
         if (I.format("DD-MM-YYYY HH:mm") == intervaloI.format("DD-MM-YYYY HH:mm") && F.format("DD-MM-YYYY HH:mm") == intervaloF.format("DD-MM-YYYY HH:mm")) {
@@ -263,9 +346,9 @@ function haConflitoDeHorario(possivelConflitoDeHorario, DataInicio, DataFinal) {
 }
 
 //Verificar todos os dias especificos e ver se não conflita os horarios
-function verificaConflitosSemana(diasDaSemana) {
+function verificaConflitosSemana(diasDaSemana, diasEspecificos) {
     //funcao que retorna todos os dias especificos
-    let diasEspecificos = retornaDiasEspecifico()
+    // let diasEspecificos = retornaDiasEspecifico()
 
     //Conflitos de horario no mesmo dia da semana
     return possivelConflitoDeHorario = diasEspecificos.filter((element) => {
@@ -376,38 +459,42 @@ router.post('/semanal', (req, res) => {
         res.status(400).send("Erro: week só podem conter numeros de [0-6]")
     } else {
         // Verificar todos os dias especificos e ver se não conflita os horarioss
-        possivelConflitoDeHorario = verificaConflitosSemana(req.body.week)
+        possivelConflitoDeHorario = verificaConflitosSemana(req.body.week, retornaDiasEspecifico())
         // Essa variavel contem os dias que podem dar conflito de horario
-        console.log(possivelConflitoDeHorario);
+        // console.log(possivelConflitoDeHorario);
 
         if (haConflitoDeHorario(possivelConflitoDeHorario, DataInicio, DataFinal)) {
             res.status(400).send("Erro: Conflito de horario com especificos")
         } else {
             //Verificar conflitos entre os semanais
+            // Verificar todos os dias semana e ver se não conflita os horarioss
+            possivelConflitoDeHorarioSemana = verificaConflitosSemana(req.body.week, retornaDiasSemana())
 
+            console.log("AQUI");
+            console.log(possivelConflitoDeHorarioSemana);;
 
+            if (haConflitoDeHorario(possivelConflitoDeHorarioSemana, DataInicio, DataFinal)) {
+                res.status(400).send("Erro: Conflito de horario com semana")
 
+            } else {
+                var salvar = {
+                    id: uuidv1(),
+                    day: "all",
+                    weekDay: req.body.week,
+                    start: DataInicio.format("HH:mm"),
+                    end: DataFinal.format("HH:mm")
+                }
 
+                //Ler json salvo em data
+                var dados = lerJSON()
 
+                //Insere na variavel
+                dados.horarios.push(salvar)
 
-
-            var salvar = {
-                id: uuidv1(),
-                day: "all",
-                weekDay: req.body.week,
-                start: DataInicio.format("HH:mm"),
-                end: DataFinal.format("HH:mm")
+                //Salva o dado no Json
+                salvaJSON(dados)
+                res.status(201).send(salvar)
             }
-
-            //Ler json salvo em data
-            var dados = lerJSON()
-
-            //Insere na variavel
-            dados.horarios.push(salvar)
-
-            //Salva o dado no Json
-            salvaJSON(dados)
-            res.status(201).send(salvar)
         }
 
     }
@@ -422,8 +509,45 @@ router.post('/diario', (req, res) => {
 
     if (DataInicio > DataFinal) {
         res.status(400).send("Erro: Data inicio maior que data fim")
-    }
+    } else {
+        // Verificar todos os dias especificos e ver se não conflita os horarioss
+        possivelConflitoDeHorario = verificaConflitosSemana(req.body.week, retornaDiasEspecifico())
+        // Essa variavel contem os dias que podem dar conflito de horario
+        // console.log(possivelConflitoDeHorario);
 
+        if (haConflitoDeHorario(possivelConflitoDeHorario, DataInicio, DataFinal)) {
+            res.status(400).send("Erro: Conflito de horario com especificos")
+        } else {
+            //Verificar conflitos entre os semanais
+            // Verificar todos os dias semana e ver se não conflita os horarioss
+            possivelConflitoDeHorarioSemana = verificaConflitosSemana("0123456", retornaDiasSemana())
+
+            // console.log(possivelConflitoDeHorarioSemana);;
+
+            if (haConflitoDeHorario(possivelConflitoDeHorarioSemana, DataInicio, DataFinal)) {
+                res.status(400).send("Erro: Conflito de horario com semana")
+
+            } else {
+                var salvar = {
+                    id: uuidv1(),
+                    day: "all",
+                    weekDay: req.body.week,
+                    start: DataInicio.format("HH:mm"),
+                    end: DataFinal.format("HH:mm")
+                }
+
+                //Ler json salvo em data
+                var dados = lerJSON()
+
+                //Insere na variavel
+                dados.horarios.push(salvar)
+
+                //Salva o dado no Json
+                salvaJSON(dados)
+                res.status(201).send(salvar)
+            }
+        }
+    }
     //Pegar todos os cadastro em dias especificos e verificar se conflita
 
     //Pegar todos os cadastros semanais e verificar se conflita
