@@ -23,7 +23,7 @@ String.prototype.isNumberOfWeek = function () {
 }
 
 //Retornar os atendimentos do dia 
-var tudo = (data) => {
+const atendimentosDia = (data) => {
     //00:00 da data passada na funcao
     var inicioDoDia = moment(data.format("DD-MM-YYYY"), "DD-MM-YYYY")
     var dataInicio = inicioDoDia
@@ -84,11 +84,11 @@ var tudo = (data) => {
             if (horario.day != "all") {
                 console.log("ESPECIFICO")
                 console.log(dataInicio.format("DD-MM-YYYY HH:mm:ss [Dia da semana] d:dddd"));
-                console.log(moment(horario.day+" "+horario.end, "DD-MM-YYYY HH:mm").format("DD-MM-YYYY HH:mm:ss [Dia da semana] d:dddd"));
+                console.log(moment(horario.day + " " + horario.end, "DD-MM-YYYY HH:mm").format("DD-MM-YYYY HH:mm:ss [Dia da semana] d:dddd"));
                 console.log(dataFim.format("DD-MM-YYYY HH:mm:ss [Dia da semana] d:dddd"));
 
                 //Se a day esta entre o intervalo [dataInicio, dataFim]
-                if (moment(horario.day, "DD-MM-YYYY").isBetween(dataInicio, dataFim, null,"[]")) {
+                if (moment(horario.day, "DD-MM-YYYY").isBetween(dataInicio, dataFim, null, "[]")) {
                     var resp = {
                         day: horario.day,
                         //Intervalo errado mas é esse o sentido
@@ -166,6 +166,29 @@ var tudo = (data) => {
     return horariosDisponiveis
 }
 
+//Ler arquivo Json
+const lerJSON = (dados) => {
+    try {
+        let rawdata = fs.readFileSync("src\\data\\data.json");
+        dados = JSON.parse(rawdata);
+    } catch (error) {
+        dados = {
+            "horarios": []
+        }
+    }
+    return dados
+}
+
+const salvaJSON = (dados) => {
+    fs.writeFile("src\\data\\data.json", JSON.stringify(dados), function (erro) {
+        if (erro) {
+            throw erro;
+        }
+        console.log("Atendimento salvo");
+    });
+
+}
+
 //Salvar um atendimento em um dia e horario especificos
 router.post('/especifico', (req, res) => {
     const DataInicio = req.body.longI;
@@ -176,45 +199,83 @@ router.post('/especifico', (req, res) => {
         res.status(400).send("Erro: Data inicio maior que data fim")
     }
 
+    var insere = false;
+
     //atendimentos do dia 
-    let horariosDisponiveis = tudo(moment.unix(DataInicio))
-    console.log(horariosDisponiveis)
-    // console.log("Aqui: " + DataFinal);
-    // var a = moment.unix(1583040600)
-    // console.log(a.format());
+    let horariosDisponiveis = atendimentosDia(moment.unix(DataInicio))
 
+    //Verifica se o dia todo esta livre
+    if (horariosDisponiveis.length == 0) {
+        console.log("Pode inserir no dia");
+        insere = true
+    } else {
+        var I = moment.unix(DataInicio)
+        var F = moment.unix(DataFinal)
+        //Verifica os horarios do dia especifico
+        let conflitos = horariosDisponiveis[0].intervals.filter((element) => {
+            var intervaloI = moment(horariosDisponiveis[0].day + " " + element.start, "DD-MM-YYYY HH:mm")
+            var intervaloF = moment(horariosDisponiveis[0].day + " " + element.end, "DD-MM-YYYY HH:mm")
 
-    var salvar = {
-        id: uuidv1(),
-        day: moment.unix(DataFinal).format("DD-MM-YYYY"),
-        weekDay: moment.unix(DataFinal).format("d"),
-        start: moment.unix(DataInicio).format("HH:mm"),
-        end: moment.unix(DataFinal).format("HH:mm")
-    }
+            // console.log("VERIFICACAO " + intervaloI.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"));
+            // console.log("VERIFICACAO " + moment.unix(DataInicio).format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"));
+            // console.log("VERIFICACAO " + intervaloF.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"));
+            // console.log();
 
+            console.log(I.format("DD-MM-YYYY HH:mm"));
+            console.log(intervaloI.format("DD-MM-YYYY HH:mm"));
+            console.log(F.format("DD-MM-YYYY HH:mm"));
+            console.log(intervaloF.format("DD-MM-YYYY HH:mm"));
+            console.log()
 
-    //Ler json salvo em data
-    let dados;
-    try {
-        let rawdata = fs.readFileSync("src\\data\\data.json");
-        dados = JSON.parse(rawdata);
-    } catch (error) {
-        dados = {
-            "horarios": []
+            //Se os conjuntos forem iguais não insere
+            if (I.format("DD-MM-YYYY HH:mm") == intervaloI.format("DD-MM-YYYY HH:mm") && F.format("DD-MM-YYYY HH:mm") == intervaloF.format("DD-MM-YYYY HH:mm")) {
+                // console.log("IGUAL")
+                return element;
+            } else
+                //verifica se a data inicio e data fim esta entre os intervalos já existentes
+                if ((moment.unix(DataInicio).isBetween(intervaloI, intervaloF, null, "()") || moment.unix(DataFinal).isBetween(intervaloI, intervaloF, null, "()"))) {
+                    //Se um dos extremos estiver no meio não salva o atendimento
+                    console.log("CONFLITO");
+                    return element;
+                }
+        })
+        // console.log("Depois ");
+
+        console.log(conflitos);
+
+        if (conflitos.length == 0) {
+            insere = true
+        } else {
+            insere = false
         }
     }
-    //Insere na variavel
-    dados.horarios.push(salvar)
 
-    //Inserir novo cadastro no arquivo json
-    fs.writeFile("src\\data\\data.json", JSON.stringify(dados), function (erro) {
-        if (erro) {
-            throw erro;
+    if (insere) {
+        //Dados a serem salvos
+        // console.log("A inserir INICIO " + moment.unix(DataInicio).format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"));
+        // console.log("A inserir FINAL " + moment.unix(DataFinal).format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"));
+
+        var salvar = {
+            id: uuidv1(),
+            day: moment.unix(DataFinal).format("DD-MM-YYYY"),
+            weekDay: moment.unix(DataFinal).format("d"),
+            start: moment.unix(DataInicio).format("HH:mm"),
+            end: moment.unix(DataFinal).format("HH:mm")
         }
-        console.log("Atendimento salvo");
-    });
+        
+        //Ler json salvo em data
+        var dados = lerJSON()
 
-    res.status(201).send(salvar)
+        //Insere na variavel
+        dados.horarios.push(salvar)
+
+        //Salva o dado no Json
+        salvaJSON(dados)
+        res.status(201).send(salvar)
+
+    } else {
+        res.status(400).send("Erro: Conflito de horario")
+    }
 })
 
 //Salvar um atendimento em um horario especificos diariamente
@@ -236,25 +297,13 @@ router.post('/diario', (req, res) => {
 
 
     //Ler json salvo em data
-    let dados;
-    try {
-        let rawdata = fs.readFileSync("src\\data\\data.json");
-        dados = JSON.parse(rawdata);
-    } catch (error) {
-        dados = {
-            "horarios": []
-        }
-    }
+    var dados = lerJSON()
+
     //Insere na variavel
     dados.horarios.push(salvar)
 
-    //Inserir novo cadastro no arquivo json
-    fs.writeFile("src\\data\\data.json", JSON.stringify(dados), function (erro) {
-        if (erro) {
-            throw erro;
-        }
-        console.log("Atendimento salvo");
-    });
+    //Salva o dado no Json
+    salvaJSON(dados)
 
     res.status(201).send(salvar)
 })
@@ -278,26 +327,15 @@ router.post('/semanal', (req, res) => {
         start: moment(DataInicio).format("HH:mm"),
         end: moment(DataFim).format("HH:mm")
     }
+
     //Ler json salvo em data
-    let dados;
-    try {
-        let rawdata = fs.readFileSync("src\\data\\data.json");
-        dados = JSON.parse(rawdata);
-    } catch (error) {
-        dados = {
-            "horarios": []
-        }
-    }
+    var dados = lerJSON()
+
     //Insere na variavel
     dados.horarios.push(salvar)
 
-    //Inserir novo cadastro no arquivo json
-    fs.writeFile("src\\data\\data.json", JSON.stringify(dados), function (erro) {
-        if (erro) {
-            throw erro;
-        }
-        console.log("Atendimento salvo");
-    });
+    //Salva o dado no Json
+    salvaJSON(dados)
 
     res.status(201).send(salvar)
 })
