@@ -4,7 +4,7 @@ const router = express.Router();
 const fs = require('fs')
 const moment = require("moment")
 
-router.get('/', (req, res) => {
+router.get('/disp', (req, res) => {
     //Recebe os dois parametros long {ini, end}
     const {
         ini,
@@ -12,11 +12,15 @@ router.get('/', (req, res) => {
     } = req.query
 
     //Tranforma datas em obj Moment
-    let dataInicio = moment.unix(ini)
-    console.log(dataInicio.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"))
-    let dataFim = moment.unix(end)
-    console.log(dataFim.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"))
+    // let dataInicio = moment.unix(ini)
+    // console.log(dataInicio.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"))
+    // let dataFim = moment.unix(end)
+    // console.log(dataFim.format("DD-MM-YYYY HH:mm [Dia da semana] d:dddd"))
 
+    let dataInicio = moment(ini, "DD-MM-YYYY")
+    let dataFim = moment(end, "DD-MM-YYYY")
+
+    // console.log("OIII")
     // let dataFim = moment.unix(end) //+23h:59m
 
     //Ler arquivo data.json
@@ -133,6 +137,7 @@ router.get('/', (req, res) => {
             })
         }
 
+        console.log("A");
 
         weekday_index = weekday_index.add(1, "day")
     }

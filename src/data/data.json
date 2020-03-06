@@ -1,1 +1,25 @@
-{"horarios":[{"id":"7b9e3b40-5fdd-11ea-a9f4-3db09e0816c5","day":"all","weekDay":"0123456","start":"10:00","end":"11:00"},{"id":"a4418570-5fdd-11ea-9c1b-7b9a5c9a2580","day":"all","weekDay":"123","start":"10:00","end":"11:00"},{"id":"ad6ffc30-5fdd-11ea-ac5b-6bdbe595a054","day":"all","weekDay":"123","start":"11:00","end":"12:00"}]}
+{
+    "horarios": [
+        {
+            "id": "7b9e3b40-5fdd-11ea-a9f4-3db09e0816c5",
+            "day": "all",
+            "weekDay": "0123456",
+            "start": "10:00",
+            "end": "11:00"
+        },
+        {
+            "id": "a4418570-5fdd-11ea-9c1b-7b9a5c9a2580",
+            "day": "all",
+            "weekDay": "123",
+            "start": "10:00",
+            "end": "11:00"
+        },
+        {
+            "id": "ad6ffc30-5fdd-11ea-ac5b-6bdbe595a054",
+            "day": "all",
+            "weekDay": "123",
+            "start": "11:00",
+            "end": "12:00"
+        }
+    ]
+}
